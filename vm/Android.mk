@@ -45,9 +45,9 @@ include $(LOCAL_PATH)/ReconfigureDvm.mk
 
 # Overwrite default settings
 LOCAL_MODULE := libdvm
-LOCAL_CFLAGS += $(target_smp_flag)
+LOCAL_CFLAGS += $(target_smp_flag) -fno-strict-aliasing
 ifeq ($(TARGET_ARCH_LOWMEM),true)
-    LOCAL_CFLAGS += -DDALVIK_LOWMEM
+    LOCAL_CFLAGS += -DDALVIK_LOWMEM -fno-strict-aliasing
 endif
 
 # Define WITH_ADDRESS_SANITIZER to build an ASan-instrumented version of the
@@ -55,7 +55,7 @@ endif
 ifneq ($(strip $(WITH_ADDRESS_SANITIZER)),)
     LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/asan
     LOCAL_ADDRESS_SANITIZER := true
-    LOCAL_CFLAGS := $(filter-out $(CLANG_CONFIG_UNKNOWN_CFLAGS),$(LOCAL_CFLAGS))
+    LOCAL_CFLAGS := $(filter-out $(CLANG_CONFIG_UNKNOWN_CFLAGS),$(LOCAL_CFLAGS)) -fno-strict-aliasing
 endif
 
 # TODO: split out the asflags.
@@ -66,7 +66,7 @@ include $(BUILD_SHARED_LIBRARY)
 # Derivation #1
 # Enable assertions and JIT tuning
 include $(LOCAL_PATH)/ReconfigureDvm.mk
-LOCAL_CFLAGS += -UNDEBUG -DDEBUG=1 -DLOG_NDEBUG=1 -DWITH_DALVIK_ASSERT \
+LOCAL_CFLAGS += -UNDEBUG -DDEBUG=1 -DLOG_NDEBUG=1 -DWITH_DALVIK_ASSERT -fno-strict-aliasing \
                 -DWITH_JIT_TUNING $(target_smp_flag)
 # TODO: split out the asflags.
 LOCAL_ASFLAGS := $(LOCAL_CFLAGS)
@@ -78,7 +78,7 @@ ifneq ($(dvm_arch),mips)    # MIPS support for self-verification is incomplete
     # Derivation #2
     # Enable assertions and JIT self-verification
     include $(LOCAL_PATH)/ReconfigureDvm.mk
-    LOCAL_CFLAGS += -UNDEBUG -DDEBUG=1 -DLOG_NDEBUG=1 -DWITH_DALVIK_ASSERT \
+    LOCAL_CFLAGS += -UNDEBUG -DDEBUG=1 -DLOG_NDEBUG=1 -DWITH_DALVIK_ASSERT -fno-strict-aliasing \
                     -DWITH_SELF_VERIFICATION $(target_smp_flag)
     # TODO: split out the asflags.
     LOCAL_ASFLAGS := $(LOCAL_CFLAGS)
@@ -91,7 +91,7 @@ endif # dvm_arch!=mips
 # Compile out the JIT
 WITH_JIT := false
 include $(LOCAL_PATH)/ReconfigureDvm.mk
-LOCAL_CFLAGS += $(target_smp_flag)
+LOCAL_CFLAGS += $(target_smp_flag) -fno-strict-aliasing
 # TODO: split out the asflags.
 LOCAL_ASFLAGS := $(LOCAL_CFLAGS)
 LOCAL_MODULE := libdvm_interp
@@ -137,11 +137,11 @@ ifeq ($(WITH_HOST_DALVIK),true)
             $(patsubst libffi, ,$(LOCAL_SHARED_LIBRARIES))
     endif
 
-    LOCAL_CFLAGS += $(host_smp_flag)
+    LOCAL_CFLAGS += $(host_smp_flag) -fno-strict-aliasing
     # TODO: split out the asflags.
     LOCAL_ASFLAGS := $(LOCAL_CFLAGS)
     ifeq ($(TARGET_ARCH_LOWMEM),true)
-        LOCAL_CFLAGS += -DDALVIK_LOWMEM
+        LOCAL_CFLAGS += -DDALVIK_LOWMEM -fno-strict-aliasing
     endif
     LOCAL_MODULE_TAGS := optional
     LOCAL_MODULE := libdvm
